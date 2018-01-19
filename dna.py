@@ -8,7 +8,7 @@ from random import randint, choice
 #from functions import *
 
 
-class DNA_object(object):
+class living_dna(object):
     """ manages all inheritance, personality and genetic attibutes of a living
     creature in the game. """
     counter = 0
@@ -17,13 +17,13 @@ class DNA_object(object):
     genomelength = 0
     def __init__(self, **kwargs):
         """  """
-        DNA_object.genomelength = kwargs.get('genomelength', 12)
-        DNA_object.mutateRate = kwargs.get('mutateRate', 0.01)
+        living_dna.genomelength = kwargs.get('genomelength', 12)
+        living_dna.mutateRate = kwargs.get('mutateRate', 0.01)
         self.identification = count_people()
-        self.gender = kwargs.get('gender', choice(["male", "female"]))
-        self.genes = kwargs.get('genes', new_Chromo(DNA_object.genomelength))
+        self.gender = kwargs.get('gender', random_sex())
+        self.genes = kwargs.get('genes', new_chromo(living_dna.genomelength))
         self.heritage = kwargs.get('heritage', [])
-        self.mbti = newPersonality(self.genes)
+        self.mbti = calc_personality(self.genes)
         self.fitness = self.calc_fitness()
 
     def calc_fitness(self):
@@ -34,8 +34,8 @@ class DNA_object(object):
         for genepair in self.genes:
             running_total += sum(self.genes[genepair])
         thisfit = int(running_total / len(self.genes))
-        if DNA_object.max_fitness < thisfit:
-            DNA_object.max_fitness = thisfit
+        if living_dna.max_fitness < thisfit:
+            living_dna.max_fitness = thisfit
         return thisfit
 
     def is_related(self, partner):
@@ -87,20 +87,26 @@ class DNA_object(object):
         # =====================================================================
         new_heritage = mom_geneology + dad_geneology
         new_heritage += [str(self.identification)] + [str(partner.identification)]
-        return DNA_object(genes=offspring,
+        return living_dna(genes=offspring,
                           mutateRate=self.mutateRate,
                           heritage=new_heritage)
 
     def report(self, tofile=False):
         """ prints a bunch of data 'n shit... maybe to file. """
-        blank = ("" * 150)
-        line1, line2, line3 = "My name is:", "Personality:", "FITNESS:"
+        blank = ("                                                           ")
         # =====================================================================
         # 1st part of the report is name, personalith and fitness score
         # =====================================================================
-        line1 = (line1 + blank)[50] + (blank + str(self.identification))[:-10] + "\n"
-        line2 = (line2 + blank)[50] + (blank + self.mbti)[:-10] + "\n"
-        line3 = (line3 + blank)[50] + (blank + str(self.fitness))[:-10] + "\n"
+        line1 = "NAME:"
+        line1 += blank[0:25-len("NAME:")-len(str(self.identification))]
+        line1 += str(self.identification) + "\n"
+        line2 = "PERSONALITY:"
+        line2 += blank[0:25-len("PERSONALITY:")-len(self.mbti)]
+        line2 += self.mbti + "\n"
+        line3 = "FITNESS:"
+        line3 += blank[0:25-len("FITNESS:")-len(str(self.fitness))]
+        line3 += str(self.fitness) + "\n"
+
         mybreak = int(len(self.genes) / 2)
         geneline = "My GENES include:        "
         neverused = True
@@ -122,19 +128,24 @@ class DNA_object(object):
 # Helper functions that the object does not need to carry around
 # =============================================================================
 
+def random_sex():
+    """ returns a random sex """
+    sexes = ["male", "female"]
+    return choice(sexes)
+
 def count_people():
     """ global counter for all DNA objects in play """
-    DNA_object.counter += 1
-    return DNA_object.counter
+    living_dna.counter += 1
+    return living_dna.counter
 
-def new_Chromo(genomelength):
+def new_chromo(genomelength):
     """ populates empty genestrings with random genes """
     thisdict = {}
     for i in range(genomelength):
-        thisdict[i] = (newGene(50, 10), newGene(50, 10))
+        thisdict[i] = (new_gene(50, 10), new_gene(50, 10))
     return thisdict
 
-def newPersonality(genestouse=True, verbose=False):
+def calc_personality(genestouse=True, verbose=False):
     """ outputs mbti code based on gene pairs 0 to 3 """
     # =========================================================================
     # If i'm not given any genes to work with, make em up
@@ -154,7 +165,7 @@ def newPersonality(genestouse=True, verbose=False):
         print(mbti)
     return mbti
 
-def newGene(center=50, variance=100):
+def new_gene(center=50, variance=100):
     """ returns a random number within a range around a centervalue """
     gene_min = int(center - (variance/2))
     gene_max = int(center + (variance/2))
@@ -182,7 +193,7 @@ def test_classes():
         index = 0
         while index < howmany:
             index += 1
-            my_population.append(DNA_object(genes=new_Chromo(15)))
+            my_population.append(living_dna(genes=new_chromo(15)))
         sortgenders()
 
     def build_more_generations(howmany):
@@ -211,10 +222,15 @@ def test_classes():
 
     for person in my_population:
         population[person.identification] = person
-    
+
     print(len(population))
-    for index in range(len(population)):
-        population[str(index)].report("myconsole.txt")
+    with open("myconsole.txt", "w") as file_target:
+        print("### ======================================\n", file=file_target)
+        print("### OUTPUT FROM DNA TESTING SEQUENCE \n", file=file_target)
+        print("### ======================================\n", file=file_target)
+
+    for index in population:
+        population[index].report("myconsole.txt")
 
 if __name__ == "__main__":
     test_classes()
