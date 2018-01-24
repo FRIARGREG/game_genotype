@@ -7,19 +7,37 @@ Created on Fri Jan 19 14:33:18 2018
 """
 
 ## new template for my code
-import os
+import os, datetime
 from dna import living_dna
+
+# =============================================================================
+# date_time = datetime.datetime.now()
+# moment = date_time.time()
+# current_check = datetime.datetime.minute - moment
+# 
+# =============================================================================
+
 
 class basic_exist_thing(object):
     """ the root of all things is existance """
     def __init__(self, **kwargs):
-        """ the root of all things is existance """
+        """ the root of all things is existance 
+        x = carbonbasedlife.basic_exist_thing(height=1.83, mass=2500, length=3, width=2)
+        x.calc_volume()
+        : 10.98
+        x.calc_encumbrance()
+        : 54900.0
+        
+        """
         # =====================================================================
         # this is the parent for all objects in this world
         #      * all objects have physical attibutes and simple methods of
         #        behaviour like gravity and magnetics
         #      * to make things far simpler and to bite my thumb at the U.S.
         #        all measurements will be in metric. so there Mr. Trump.
+        #
+        #   stuff to add Vectors, Forces, Oscillation
+        #
         # =====================================================================
         self.mass = kwargs.get('mass', 0.0)
 
@@ -38,6 +56,115 @@ class basic_exist_thing(object):
         """ encumberance is how difficult a thing is carry. """
         return self.mass * self.volume * 2
 
+# =============================================================================
+# nodes are the items which manage the experiences into what 
+# the living thing has learned or feels. I have started 3 basic
+# nodes based on a root node. the root node is the template
+# while the other nodes have more specific uses.
+# =============================================================================
+
+class root_motivation(object):
+    """ all emotions, thoughts, skills and talents will come from this """
+    def __init__(self, **kwargs):
+        self.name = kwargs.get('name', None)
+        self.modifiers = kwargs.get('modifiers', self.init_modifiers())
+        self.current_value = kwargs.get('starting_value', 0)
+        if count(self.modifiers) > 0:
+            self.current_value = calc_current_value()
+
+    def init_modifiers(self):
+        self.modifiers['fear'] = {'danger':(-5,0),
+                                  'injury':(-5,0),
+                                  'darkness':(-5,0),
+                                  'fire':(-5,0),
+                                  'magic':(-5,0),
+                                  'weather':(-5,0),
+                                  'safety':(1,None)}
+        self.modifiers['hunger'] = {'eaten':(5,0),
+                                    'pregnant':(-2,0),
+                                    'injury':(-2,0),
+                                    'exertion':(-5,0)}
+        self.modifiers['arousal'] = {'danger':(0,0),
+                                     'danger':(0,0),
+                                     'danger':(0,0),
+                                     'danger':(0,0)}
+        self.modifiers['exhaustion'] = {'danger':(0,0),
+                                        'danger':(0,0),
+                                        'danger':(0,0),
+                                        'danger':(0,0)}
+
+            
+
+    def calc_current_value(self):
+        """ 1) sum up all the current temporary/variable modifiers and apply to 
+        current value. step 2) Then add all the permanent effects. """
+        ## STEP 1: APPLY TEMPORARY FACTORS AND ADJUST PERIOD
+        total_variable_modification = 0
+        for modifier in self.modifiers:
+            modify_value, modify_period = self.modifiers[modifier]
+            if modify_period > 0:
+                total_variable_modification += modify_value
+                self.modifiers[modifier] = (modify_value, modify_period -1)
+        return total_variable_modification + self.total_permanent_effects
+
+# =============================================================================
+#     def get_permanent_modifiers(self):
+#         """ runs at init and anytime permanent modifiers change """
+#         ## STEP 2: APPLY PERMANENT FACTORS FROM PERSON
+#         total_permanent_effects = 0
+#         person_perm_modifiers = kwargs.get('person_perm_modifiers', dict())
+#         if self.name in person_perm_modifiers:
+#             ## DICT("NAME OF AFFECTOR" : (VALUE TO JUMP, MIN VAL OF CURRENT, MAX VAL OF CURRENT))
+#             my_value, my_min, my_max = person_perm_modifiers[self.name]
+#             if self.current_value <= my_min:
+#                 total_permanent_effects += my_value
+#             elif self.current_value >= my_max:
+#                 total_permanent_effects -= my_value
+#         return total_permanent_effects
+# =============================================================================
+
+# =============================================================================
+#     def try_to_learn(self, **kwargs):
+#         """ method used to increase skills or remember experiences """
+#         #nothing = kwargs.get('nothing', None)
+#         pass
+# =============================================================================
+
+
+
+
+class primitive_brain(object):
+    """ all the basic primitive reactions are here """
+    def __init__(self, **kwargs):
+        self.name = kwargs.get('name', None)
+        self.motivators = ['fear', 'hunger', 'arousal', 'exhaustion']
+        self.basic_instincts = {}
+        for motive in motivaors:
+            self.basic_instincts[motive] = root_motivation(name=motive, 
+                                                           modifiers=kwargs.get('modifiers'))
+                
+    def assess(self):
+        """ re-evaluate motivators """
+# =============================================================================
+#         The primitive mind is almost constantly scanning for danger,
+#         and searching to fulfill it's neads like hunger, sex, sleep
+# =============================================================================
+
+
+
+
+
+
+
+
+
+# =============================================================================
+# class emote_node(root_node):
+#     """ I am Jack's Rage. I simmer until threatened """
+#     def __init__(self, **kwargs):
+#         root_node.__init__(self, kwargs)
+# =============================================================================
+
 
 class living_thing(basic_exist_thing):
     """ container for living_dna() this object contains the methods that all
@@ -46,7 +173,9 @@ class living_thing(basic_exist_thing):
         """ initializing first heartbeat """
         basic_exist_thing.__init__(self)
         self.dna = kwargs.get('dna', living_dna())
-        self.emotional_state = self.calc_emotional_state()
+        self.emotional_state = self.calc_emotional_state(first_run=True)
+        self.physical_state = self.calc_physical_state(first_run=False)
+        self.permanent_affectors = kwargs.get('permanent_effects', dict())
 
     def instinct_reproduce(self):
         """ all life feels a drive to reproduce """
@@ -64,8 +193,8 @@ class living_thing(basic_exist_thing):
         # =====================================================================
         pass
 
-    def calc_emotional_state(self):
-        """ this method constantly adjusts emotional state of the creature """
+    def instinct_protect_kind(self):
+        """ triggered when offspring, mate or community member is harmed """
         # =====================================================================
         # all creatures have an emotional state of balance which can (and will)
         # be affected by their environment, their own actions/inactions and the
@@ -73,20 +202,57 @@ class living_thing(basic_exist_thing):
         # =====================================================================
         pass
 
+    def calc_emotional_state(self, **kwargs):
+        """ this method constantly adjusts emotional state of the creature """
+        # =====================================================================
+        # all creatures have an emotional state of balance which can (and will)
+        # be affected by their environment, their own actions/inactions and the
+        # actions/inactions of the creatures/people around them.
+        # =====================================================================
+        # my_state is a dictionary of lists. list[0] is always the current
+        # state of this emotion, list[index>0] will contain tuples of reactions
+        # this being has when it meets/experiences things & events
+        first_run = kwargs.get('first_run', False)
+        my_now = kwargs.get('time_called', False)
+        my_state = self.calc_emotional_state
 
+        if first_run:
+            my_state = {'love' : [0],
+                        'contentment' : [0],
+                        'distress' : [0],
+                        'frustration' : [0],
+                        'fear' : [0],
+                        'anger' : [0],
+                        'belonging' : [0]}
 
+        if my_now >= self.last_updated + (minutes(10)):
+            self.last_updated = my_now
+            for emotion in my_state:
+                # time produces emotional entropy
+                my_state[emotion][0] += 1 if my_state[emotion][0] < 0 else -1
+                # but conditions can affect emotions over time
+                if len(my_state[emotion]) >=1:
+                    for affector in my_state[emotion]:
+                        if affector > 0:
+                            my_state[emotion][0] += my_state[emotion][affector]
+        ## I may replace the integers stored in the emotion lists with an
+        ## emotion_affector object.
+        return my_state
 
+    def calc_physical_state(self, **kwargs):
+        """ this method constantly adjusts physical state of the creature """
+        first_run = kwargs.get('first_run', False)
+        my_now = kwargs.get('time_called', False)
+        my_state = self.calc_physical_state
 
+        if now() >= self.last_updated + (minutes(10)):
+            self.last_updated = int(datetime.datetime.now())
 
-
-
-
-
-
-
-
-
-
+        my_state = {'thirst' : [0],
+                    'hunger' : [0],
+                    'pain' : [0],
+                    'discomfort' : [0]}
+        return my_state
 
 
 
@@ -108,6 +274,23 @@ def test_my_classes():
     ## this is a great place to enter test code of my module that
     ## I don't want to run when I'm actually using the software.
     print("%s is being run as %s" % (__file__, __name__))
+    x = basic_exist_thing(height = 1.83,
+                          mass = 2500,
+                          length = 3,
+                          width = 2)
+    if x.calc_volume() == 10.98:
+        print("basic_exist_thing passed test #1")
+    if x.calc_encumbrance() == 54900.0:
+        print("basic_exist_thing passed test #2")
+
+    x = living_thing()self.dna = kwargs.get('dna', living_dna())
+        self.emotional_state = self.calc_emotional_state(first_run=True)
+        self.physical_state = self.calc_physical_state(first_run=False)
+        self.permanent_affectors = kwargs.get('permanent_effects', dict())
+    
+    
+
+
 
 ## this line forces the programmer no to name his files after
 ## the __main__ namespace. this can be troublesome when importing
