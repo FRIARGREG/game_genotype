@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 """
 Created on Wed Jan 17 07:20:26 2018
-
+this is totally cool because now I can GIT this shit done!!! lol
+GIT it!? HAHAHAHA
 @author: friar
 """
 from random import randint, choice
